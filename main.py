@@ -16,7 +16,7 @@ denoise_selected = ""
 file_listbox = None
 
 BG_COLOR = "white"
-HIST_SIZE = (2, 2)
+HIST_SIZE = (3, 3)
 SEG_SIZE = (4, 4)
 
 
@@ -113,12 +113,12 @@ def drawHistogram():
 
     fig2, ax2 = plt.subplots(figsize=HIST_SIZE)
     fig2.subplots_adjust(left=0.35, bottom=0.25, right=0.75, top=0.75)
-    hist = FigureCanvasTkAgg(fig2, master=frame_right)
+    hist = FigureCanvasTkAgg(fig2, master=frame_histogram)
 
     ax2.hist(image[image > 10].flatten(), 200)
     hist.draw()
 
-    hist.get_tk_widget().grid(row=4, column=2, columnspan=4)
+    hist.get_tk_widget().pack(expand=True, fill="both")
 
     # Ajustar los márgenes del histograma
 
@@ -127,6 +127,9 @@ root = tk.Tk()
 root.title("Interfaz de Subida de Datos")
 root.geometry("1200x800")
 root.resizable(False, False)  # Bloquear redimensionamiento
+
+# Estilo del borde
+border_style = tk.SUNKEN
 
 menubar = tk.Menu(root)
 root.config(menu=menubar)
@@ -164,11 +167,26 @@ canvas.get_tk_widget().pack(expand=True)
 frame_right = tk.Frame(master=root, width=400, height=810, bg=BG_COLOR)
 frame_right.pack(side="right", expand=400, fill=tk.BOTH)
 
+# Función para centrar y organizar verticalmente los componentes dentro del frame
+
+
+def center_components(frame):
+    frame.grid_rowconfigure(0, weight=1)
+    frame.grid_rowconfigure(1, weight=1)
+    frame.grid_rowconfigure(2, weight=1)
+    frame.grid_rowconfigure(3, weight=1)
+    frame.grid_rowconfigure(4, weight=1)
+    frame.grid_columnconfigure(0, weight=1)
+    frame.grid_columnconfigure(1, weight=1)
+    frame.grid_columnconfigure(2, weight=1)
+    frame.grid_columnconfigure(3, weight=1)
+
+
 # SLIDER
 tk.Label(master=frame_right, text="Capa Z: ",
          bg=BG_COLOR).grid(pady=5, row=0, column=1)
-slider = tk.Scale(master=frame_right, from_=1,
-                  to=max_depth, resolution=1, orient=tk.HORIZONTAL, bg=BG_COLOR, command=slider_event)
+slider = tk.Scale(master=frame_right, from_=1, to=max_depth, resolution=1,
+                  orient=tk.HORIZONTAL, bg=BG_COLOR, command=slider_event)
 slider.grid(pady=5, row=0, column=2)
 
 # PREPROCESSING (Denoising)
@@ -183,29 +201,38 @@ preprocessing_menu = tk.OptionMenu(
     frame_right, preprocessing_var, *preprocessing_options, command=select_denoise)
 preprocessing_menu.grid(pady=5, row=1, column=2)
 
-
 # PROCESSING (Segmentation)
 algorithm_var = tk.StringVar()
 algorithm_var.set("K-means")  # Valor inicial
 algorithm_options = ["Thresholding", "K-means",
                      "Region Growing", "Gaussian Mixture Model"]
 
-tk.Label(master=frame_right, text="Segmentación: ",
-         bg=BG_COLOR).grid(pady=5, row=2, column=1)
+frame_segmentation = tk.LabelFrame(
+    master=frame_right, text="Segmentación", bg=BG_COLOR)
+frame_segmentation.grid(row=2, column=1, columnspan=4, sticky="we", padx=10)
+
+tk.Label(master=frame_segmentation,
+         text="Segmentación: ", bg=BG_COLOR).grid(pady=5, row=1, column=1)
 algorithm_menu = tk.OptionMenu(
-    frame_right, algorithm_var, *algorithm_options, command=select_algorithm)
-algorithm_menu.grid(pady=5, row=2, column=2)
+    frame_segmentation, algorithm_var, *algorithm_options, command=select_algorithm)
+algorithm_menu.grid(pady=5, row=1, column=2)
 
 # HISTOGRAM
-tk.Label(master=frame_right, text="Histograma: ",
-         bg=BG_COLOR).grid(pady=5, row=3, column=2, columnspan=4)
+frame_histogram = tk.LabelFrame(
+    master=frame_right, text="Histograma", bg=BG_COLOR, height=1000)
+frame_histogram.grid(row=4, column=1, columnspan=4,
+                     sticky="we", padx=10)
+
 fig2, ax2 = plt.subplots(figsize=HIST_SIZE)
 ax2.set_xlabel("Intensidad")
 ax2.set_ylabel("Frecuencia")
 # Ajustar los márgenes del histograma
 fig2.subplots_adjust(left=0.25, bottom=0.25, right=0.75, top=0.75)
-hist = FigureCanvasTkAgg(fig2, master=frame_right)
-hist.get_tk_widget().grid(row=4, column=2, columnspan=4)
+hist = FigureCanvasTkAgg(fig2, master=frame_histogram)
+hist.get_tk_widget().pack(expand=True, fill="both")
+
+# Centrar y organizar verticalmente los componentes dentro de frame_right
+center_components(frame_right)
 
 # Crear la carpeta "data" si no existe
 if not os.path.exists("data"):
