@@ -183,8 +183,8 @@ def segmentate(input_x, input_y, input_z, input_tol, input_tau, input_groups):
         segmentation = algorithmsCollection.gaussian_mixture_model(image)
     if algorithm_selected == "Region Growing":
         x = int(input_x.get())
-        y = int(input_x.get())
-        z = int(input_x.get())
+        y = int(input_y.get())
+        z = int(input_z.get())
         tol_value = int(input_tol.get())
 
         segmentation = algorithmsCollection.region_growing(
