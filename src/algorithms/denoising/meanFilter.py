@@ -9,7 +9,7 @@ def mean_filter(image):
     filtered_image = np.zeros_like(image)
     for row in range(rows_image):
         for col in range(cols_image):
-            neighbors = get_neighbors(image, row, col, 1, 0, 0)
+            neighbors = get_neighbors(image, row, col, 1, 0, image.shape[2]-1)
             for neighbor in neighbors:
                 x_index = neighbor[0]
                 y_index = neighbor[1]

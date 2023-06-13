@@ -3,7 +3,7 @@ import numpy as np
 from src.algorithms.neighbors import get_neighbors
 
 
-def region_growing(x, y, z, tolerance, z_depth, z_layer, image):
+def region_growing(x, y, z, tolerance, image):
     mean_value_cluster = image[x, y, z]
     segmentation = np.zeros_like(image)
     rows_image = image.shape[0]
@@ -11,7 +11,7 @@ def region_growing(x, y, z, tolerance, z_depth, z_layer, image):
 
     while radious < rows_image:
 
-        neighbors = get_neighbors(image, x, y, radious, z_layer, z_depth)
+        neighbors = get_neighbors(image, x, y, radious, 0, image.shape[2]-1)
 
         for neighbor_index in neighbors:
             x_index = neighbor_index[0]
@@ -24,5 +24,5 @@ def region_growing(x, y, z, tolerance, z_depth, z_layer, image):
                 segmentation[x_index, y_index, z_index] = 0
 
         radious = radious + 1
-
+        #mean_value_cluster = image[segmentation == 1].mean()
     return segmentation

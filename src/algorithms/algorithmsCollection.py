@@ -23,8 +23,8 @@ class algorithmsCollection:
     def k_means(image, groups):
         return k_means(image, groups)
 
-    def region_growing(x, y, z, tolerance, z_depth, z_layer, image):
-        return region_growing(x, y, z, tolerance, z_depth, z_layer, image)
+    def region_growing(x, y, z, tolerance, image):
+        return region_growing(x, y, z, tolerance, image)
 
     def thresholding(tolerance, current_tau, image):
         return thresholding(tolerance, current_tau, image)
@@ -41,7 +41,6 @@ class algorithmsCollection:
         return meddian_filter_border(image)
 
     # Standarization
-
     def z_score(image):
         return z_score(image)
 
