@@ -2,7 +2,7 @@ import numpy as np
 
 
 def k_means(image, groups):
-    iterations = 60
+    iterations = 100
 
     k_values = np.linspace(np.amin(image), np.amax(image), groups)
 

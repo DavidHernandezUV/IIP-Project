@@ -212,14 +212,16 @@ def metrics():
     values = algorithmsCollection.metrics(final_img)
     print(values)
     # Simular la obtención de los nuevos valores dinámicamente
-    nuevo_valor_gris = values[1.0]
+    nuevo_valor_gris = values[3.0]
     nuevo_valor_blanca = values[2.0]
-    nuevo_valor_liquido = values[3.0]
+    nuevo_valor_liquido = values[1.0]
+    nuevo_valor_injury = values[4.0]
 
     # Actualizar las variables de control con los nuevos valores
     materia_gris_var.set(nuevo_valor_gris)
     materia_blanca_var.set(nuevo_valor_blanca)
     liquido_var.set(nuevo_valor_liquido)
+    injury_var.set(nuevo_valor_injury)
 
 def registration():
     global image_to_pair_registration
@@ -261,7 +263,8 @@ def draw_image(segmentation):
     fig, ax = plt.subplots(figsize=SEG_SIZE)
     canvas = FigureCanvasTkAgg(fig, master=frame_center)
 
-    ax.imshow(segmentation_section, cmap="gray")
+    image = ax.imshow(segmentation_section)
+    plt.colorbar(image, ax=ax, location='right')
     canvas.draw()
     canvas.get_tk_widget().pack(expand=True)
 
@@ -366,6 +369,7 @@ menubar.add_cascade(label="Archivo", menu=file_menu)
 materia_gris_var = tk.StringVar()
 materia_blanca_var = tk.StringVar()
 liquido_var = tk.StringVar()
+injury_var = tk.StringVar()
 #Metrics
 frame_metrics = tk.LabelFrame(
     master=frame_left, text="Métricas", bg=BG_COLOR)
@@ -379,11 +383,13 @@ tk.Label(master=frame_metrics,
          text="Volúmen Materia Blanca: ", bg=BG_COLOR).grid(pady=5, row=2,sticky="W")
 tk.Label(master=frame_metrics,
          text="Volúmen Líquido Cerebro Espinal: ", bg=BG_COLOR).grid(pady=5, row=3,sticky="W")
+tk.Label(master=frame_metrics,
+         text="Volúmen Lesiones: ", bg=BG_COLOR).grid(pady=5, row=4,sticky="W")
 # Crear los labels dinámicos utilizando las variables de control
 tk.Label(master=frame_metrics, textvariable=materia_gris_var, bg="white").grid(pady=5, row=1, column=1, sticky="W")
 tk.Label(master=frame_metrics, textvariable=materia_blanca_var, bg="white").grid(pady=5, row=2, column=1, sticky="W")
 tk.Label(master=frame_metrics, textvariable=liquido_var, bg="white").grid(pady=5, row=3, column=1, sticky="W")
-
+tk.Label(master=frame_metrics, textvariable=injury_var, bg="white").grid(pady=5, row=4, column=1, sticky="W")
 
 
 center_components(frame_left)
