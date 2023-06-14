@@ -7,19 +7,26 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from src.algorithms.algorithmsCollection import algorithmsCollection
 import copy as copy
+import numpy as np
 # GLOBAL VARIABLES
 z_layer = 1
 image = None
 segmentation = None
+image_to_pair_registration = None
+image_to_histogram_matching = None
 max_depth = 0
 slider = None
 algorithm_selected = ""
 denoise_selected = ""
 standarization_selected = ""
+type_of_transform = ""
 file_listbox = None
-image_to_pair_registration = None
-image_to_histogram_matching = None
 hist_condition = 0
+
+#metrics
+gray_matter_volume = 0
+white_matter_volume = 0
+liquid_volume = 0
 
 BG_COLOR = "white"
 HIST_SIZE = (3, 3)
@@ -64,11 +71,16 @@ def select_file():
 
 def select_algorithm(choice):
     global algorithm_selected
-    global image
     algorithm_selected = choice
     draw_params()
     print("clicked:", algorithm_selected)
 
+def select_type_of_transform(choice):
+    global type_of_transform
+    global image
+    type_of_transform = choice
+    draw_params()
+    print("clicked:", type_of_transform)
 
 def select_denoise(choice):
     global denoise_selected
@@ -192,10 +204,35 @@ def segmentate(input_x, input_y, input_z, input_tol, input_tau, input_groups):
 
     draw_image(segmentation)
 
+def metrics():
+    global segmentation
+    final_img = nib.Nifti1Image(segmentation.astype(int), np.eye(4))
+    final_img.header.set_data_dtype(np.float32)
+    
+    values = algorithmsCollection.metrics(final_img)
+    print(values)
+    # Simular la obtención de los nuevos valores dinámicamente
+    nuevo_valor_gris = values[1.0]
+    nuevo_valor_blanca = values[2.0]
+    nuevo_valor_liquido = values[3.0]
 
+    # Actualizar las variables de control con los nuevos valores
+    materia_gris_var.set(nuevo_valor_gris)
+    materia_blanca_var.set(nuevo_valor_blanca)
+    liquido_var.set(nuevo_valor_liquido)
+
+def registration():
+    global image_to_pair_registration
+    global image
+    global type_of_transform
+    global segmentation
+    segmentation = algorithmsCollection.registration(image,image_to_pair_registration,type_of_transform)
+    draw_image(segmentation)
+    
 def standarization():
     global image
     global segmentation
+    global image_to_histogram_matching
     if standarization_selected == "Z-score":
         image = algorithmsCollection.z_score(image)
     if standarization_selected == "White Stripe":
@@ -203,7 +240,7 @@ def standarization():
     if standarization_selected == "Rescaling":
         image = algorithmsCollection.rescaling(image)
     if standarization_selected == "Histogram Matching":
-        image = algorithmsCollection.histogram_matching(image, image, 1)
+        image = algorithmsCollection.histogram_matching(image, image_to_histogram_matching, 50)
 
     segmentation = copy.deepcopy(image)
     draw_image(segmentation)
@@ -275,7 +312,9 @@ def drawHistogram():
     fig2.subplots_adjust(left=0.35, bottom=0.25, right=0.75, top=0.75)
     hist = FigureCanvasTkAgg(fig2, master=frame_histogram)
 
+
     ax2.hist(image[image > hist_condition].flatten(), 100)
+
     hist.draw()
 
     hist.get_tk_widget().pack(expand=True, fill="both")
@@ -294,16 +333,27 @@ border_style = tk.SUNKEN
 menubar = tk.Menu(root)
 root.config(menu=menubar)
 
-# FRAME LEFT
-frame_left = tk.Frame(master=root, width=300, height=810, bg=BG_COLOR)
-frame_left.pack(side="left")
+# Función para centrar y organizar verticalmente los componentes dentro del frame
 
-# Files box label
-label_listbox = tk.Label(master=frame_left, text="Datos", bg=BG_COLOR)
-label_listbox.place(rely=0.002, relx=0.02)
+
+def center_components(frame):
+    frame.grid_rowconfigure(0, weight=1)
+    frame.grid_rowconfigure(1, weight=1)
+    frame.grid_rowconfigure(2, weight=1)
+    frame.grid_rowconfigure(3, weight=1)
+    frame.grid_rowconfigure(4, weight=1)
+    frame.grid_columnconfigure(0, weight=1)
+    frame.grid_columnconfigure(1, weight=1)
+    frame.grid_columnconfigure(2, weight=1)
+    frame.grid_columnconfigure(3, weight=1)
+
+# FRAME LEFT
+frame_left = tk.Frame(master=root, width=400, height=810, bg=BG_COLOR)
+frame_left.pack(side="left", expand=300, fill=tk.BOTH)
+
 # Files box
 file_listbox = tk.Listbox(master=frame_left, width=45)
-file_listbox.place(rely=0.03, relx=0.02)
+file_listbox.grid(padx=5,row=0,column=0)
 file_listbox.bind("<<ListboxSelect>>", listbox_select_event)
 # Menu "Archivos"
 file_menu = tk.Menu(menubar, tearoff=0)
@@ -312,6 +362,31 @@ file_menu.add_separator()
 file_menu.add_command(label="Salir", command=root.quit)
 
 menubar.add_cascade(label="Archivo", menu=file_menu)
+# Crear las variables de control para los valores de los labels
+materia_gris_var = tk.StringVar()
+materia_blanca_var = tk.StringVar()
+liquido_var = tk.StringVar()
+#Metrics
+frame_metrics = tk.LabelFrame(
+    master=frame_left, text="Métricas", bg=BG_COLOR)
+frame_metrics.grid(row=1, column=0, columnspan=4, sticky="we", padx=10)
+button_metrics = tk.Button(master=frame_metrics, text="Aplicar",
+                                command=lambda: metrics())
+button_metrics.grid(padx=5, row=0, sticky="W")
+tk.Label(master=frame_metrics,
+         text="Volúmen Materia Gris: ", bg=BG_COLOR).grid(pady=5, row=1,sticky="W")
+tk.Label(master=frame_metrics,
+         text="Volúmen Materia Blanca: ", bg=BG_COLOR).grid(pady=5, row=2,sticky="W")
+tk.Label(master=frame_metrics,
+         text="Volúmen Líquido Cerebro Espinal: ", bg=BG_COLOR).grid(pady=5, row=3,sticky="W")
+# Crear los labels dinámicos utilizando las variables de control
+tk.Label(master=frame_metrics, textvariable=materia_gris_var, bg="white").grid(pady=5, row=1, column=1, sticky="W")
+tk.Label(master=frame_metrics, textvariable=materia_blanca_var, bg="white").grid(pady=5, row=2, column=1, sticky="W")
+tk.Label(master=frame_metrics, textvariable=liquido_var, bg="white").grid(pady=5, row=3, column=1, sticky="W")
+
+
+
+center_components(frame_left)
 
 # FRAME CENTER
 frame_center = tk.Frame(master=root, width=600, height=800)
@@ -334,33 +409,28 @@ slider.pack(pady=5)
 frame_right = tk.Frame(master=root, width=400, height=810, bg=BG_COLOR)
 frame_right.pack(side="right", expand=400, fill=tk.BOTH)
 
-# Función para centrar y organizar verticalmente los componentes dentro del frame
-
-
-def center_components(frame):
-    frame.grid_rowconfigure(0, weight=1)
-    frame.grid_rowconfigure(1, weight=1)
-    frame.grid_rowconfigure(2, weight=1)
-    frame.grid_rowconfigure(3, weight=1)
-    frame.grid_rowconfigure(4, weight=1)
-    frame.grid_columnconfigure(0, weight=1)
-    frame.grid_columnconfigure(1, weight=1)
-    frame.grid_columnconfigure(2, weight=1)
-    frame.grid_columnconfigure(3, weight=1)
-
 
 # Registration
 frame_registration = tk.LabelFrame(
     master=frame_right, text="Registro", bg=BG_COLOR)
 frame_registration.grid(row=0, column=1, columnspan=4, sticky="we", padx=10)
-
-button_registration = tk.Button(master=frame_registration, text="Aplicar",
-                                command=lambda: ())
-button_registration.grid(padx=5, row=1, column=2, sticky="E", pady=10)
-
+type_of_transform_var = tk.StringVar()
+type_of_transform_var.set("-")  # Valor inicial
+type_of_transform_options = ["Rigid", "Similarity",
+                          "QuickRigid", "SyN"]
 button_add_t1 = tk.Button(master=frame_registration, text="Agregar T1",
                           command=lambda: select_image_to_registration())
-button_add_t1.grid(padx=5, row=1, column=3, sticky="E", pady=10)
+button_add_t1.grid(padx=5, row=1, column=1, sticky="E", pady=10)
+tk.Label(master=frame_registration,
+         text="Transformación: ", bg=BG_COLOR).grid(pady=5, row=1, column=2)
+type_of_transform_menu = tk.OptionMenu(
+    frame_registration, type_of_transform_var, *type_of_transform_options, command=select_type_of_transform)
+type_of_transform_menu.grid(pady=5, row=1, column=3)
+
+button_registration = tk.Button(master=frame_registration, text="Aplicar",
+                                command=lambda: registration())
+button_registration.grid(padx=5, row=1, column=4, sticky="E", pady=10)
+
 
 # PREPROCESSING (Denoising)
 frame_denoising = tk.LabelFrame(

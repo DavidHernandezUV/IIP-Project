@@ -13,6 +13,10 @@ from src.algorithms.standarization.whiteStripe import white_stripe
 from src.algorithms.standarization.histogramMatching import histogram_matching
 from src.algorithms.standarization.rescaling import rescaling
 
+from src.algorithms.registers.registers import registration
+
+from src.algorithms.metrics.cluster_metrics import calculate_cluster_volume
+
 
 class algorithmsCollection:
 
@@ -52,3 +56,11 @@ class algorithmsCollection:
 
     def rescaling(image):
         return rescaling(image)
+    
+    #registration
+    def registration(flair,t1,type):
+        return registration(flair,t1,type)
+    
+    #metrics
+    def metrics(image):
+        return calculate_cluster_volume(image)
