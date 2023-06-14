@@ -11,8 +11,10 @@ import numpy as np
 # GLOBAL VARIABLES
 z_layer = 1
 image = None
+image_path = ""
 segmentation = None
 image_to_pair_registration = None
+image_to_pair_registration_path = ""
 image_to_histogram_matching = None
 max_depth = 0
 slider = None
@@ -35,10 +37,11 @@ SEG_SIZE = (4, 4)
 
 def select_image_to_registration():
     global image_to_pair_registration
-
+    global image_to_pair_registration_path
     file_path = filedialog.askopenfilename(
         filetypes=[("Image Files", "T1.nii.gz")])
     if file_path:
+        image_to_pair_registration_path = file_path
         # Mover el archivo seleccionado a la carpeta "data"
         nifti_image = nib.load(file_path)
         image_to_pair_registration = nifti_image.get_fdata()
@@ -50,10 +53,12 @@ def select_file():
     global segmentation
     global max_depth
     global slider
+    global image_path
     file_path = filedialog.askopenfilename(
         filetypes=[("Image Files", "*.nii.gz")])
     if file_path:
         # Mover el archivo seleccionado a la carpeta "data"
+        image_path = file_path
         shutil.copy(file_path, "data")
         nifti_image = nib.load(file_path)
         image = nifti_image.get_fdata()
@@ -224,11 +229,11 @@ def metrics():
     injury_var.set(nuevo_valor_injury)
 
 def registration():
-    global image_to_pair_registration
-    global image
+    global image_to_pair_registration_path
+    global image_path
     global type_of_transform
     global segmentation
-    segmentation = algorithmsCollection.registration(image,image_to_pair_registration,type_of_transform)
+    segmentation = algorithmsCollection.registration(image_path,image_to_pair_registration_path,type_of_transform)
     draw_image(segmentation)
     
 def standarization():
