@@ -211,7 +211,8 @@ def segmentate(input_x, input_y, input_z, input_tol, input_tau, input_groups):
 
 def metrics():
     global segmentation
-    final_img = nib.Nifti1Image(segmentation.astype(int), np.eye(4))
+   
+    final_img = nib.Nifti1Image(segmentation.astype(int),np.eye(4))
     final_img.header.set_data_dtype(np.float32)
     
     values = algorithmsCollection.metrics(final_img)
@@ -228,12 +229,23 @@ def metrics():
     liquido_var.set(nuevo_valor_liquido)
     injury_var.set(nuevo_valor_injury)
 
+def skull_stripping():
+    global segmentation
+    global image_path
+    global image
+
+    image = algorithmsCollection.skull_stripped(image_path)
+    segmentation = copy.deepcopy(image)
+    draw_image(segmentation)
+
 def registration():
     global image_to_pair_registration_path
     global image_path
     global type_of_transform
     global segmentation
-    segmentation = algorithmsCollection.registration(image_path,image_to_pair_registration_path,type_of_transform)
+    global image
+    image = algorithmsCollection.registration(image_path,image_to_pair_registration_path,type_of_transform)
+    segmentation = copy.deepcopy(image)
     draw_image(segmentation)
     
 def standarization():
@@ -375,6 +387,7 @@ materia_gris_var = tk.StringVar()
 materia_blanca_var = tk.StringVar()
 liquido_var = tk.StringVar()
 injury_var = tk.StringVar()
+
 #Metrics
 frame_metrics = tk.LabelFrame(
     master=frame_left, text="Métricas", bg=BG_COLOR)
@@ -396,6 +409,12 @@ tk.Label(master=frame_metrics, textvariable=materia_blanca_var, bg="white").grid
 tk.Label(master=frame_metrics, textvariable=liquido_var, bg="white").grid(pady=5, row=3, column=1, sticky="W")
 tk.Label(master=frame_metrics, textvariable=injury_var, bg="white").grid(pady=5, row=4, column=1, sticky="W")
 
+frame_stripped = tk.LabelFrame(
+    master=frame_left, text="Remover cráneo", bg=BG_COLOR)
+button_stripped = tk.Button(master=frame_stripped, text="Aplicar",
+                                command=lambda: skull_stripping())
+frame_stripped.grid(row=2, column=0, columnspan=4, sticky="we", padx=10)
+button_stripped.grid(padx=5, row=0, sticky="W")
 
 center_components(frame_left)
 

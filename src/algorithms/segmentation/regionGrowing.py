@@ -24,5 +24,5 @@ def region_growing(x, y, z, tolerance, image):
                 segmentation[x_index, y_index, z_index] = 0
 
         radious = radious + 1
-        #mean_value_cluster = image[segmentation == 1].mean()
+        mean_value_cluster = image[segmentation == 1].mean()
     return segmentation

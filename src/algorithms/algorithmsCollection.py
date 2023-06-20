@@ -17,6 +17,8 @@ from src.algorithms.registers.registers import registration
 
 from src.algorithms.metrics.cluster_metrics import calculate_cluster_volume
 
+from src.algorithms.strippe.strippe import skull_stripped
+
 
 class algorithmsCollection:
 
@@ -64,3 +66,7 @@ class algorithmsCollection:
     #metrics
     def metrics(image):
         return calculate_cluster_volume(image)
+    
+    #skull stripped
+    def skull_stripped(image):
+        return skull_stripped(image)
