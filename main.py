@@ -246,10 +246,6 @@ def registration():
     global segmentation
     global image_registered
     segmentation = algorithmsCollection.registration(image_path,image_to_pair_registration_path,type_of_transform)
-    final_img = nib.Nifti1Image(image.astype(int),np.eye(4))
-    final_img.header.set_data_dtype(np.float32)
-    nib.save(final_img,'./data/FLAIR_registered.nii.gz')
-    image_registered = './data/FLAIR_registered.nii.gz'
     draw_image(segmentation)
     
 def standarization():
