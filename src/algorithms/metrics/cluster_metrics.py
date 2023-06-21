@@ -6,7 +6,7 @@ def calculate_cluster_volume(segmentation):
   pixel_size = np.prod(pix_dim[1:4])
 
   image_data = segmentation.get_fdata()
-  unique_labels = np.unique(image_data)
+  unique_labels = np.unique(image_data.astype(int))
 
   cluster_volumes = {}
 

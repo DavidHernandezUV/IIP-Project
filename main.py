@@ -212,9 +212,10 @@ def segmentate(input_x, input_y, input_z, input_tol, input_tau, input_groups):
 
 def metrics():
     global segmentation
-   
-    final_img = nib.Nifti1Image(segmentation.astype(int),np.eye(4))
-    final_img.header.set_data_dtype(np.float32)
+    global image_path
+    
+    image = nib.load(image_path)
+    final_img = nib.Nifti1Image(segmentation,image.affine,image.header)
     
     values = algorithmsCollection.metrics(final_img)
     print(values)
@@ -234,8 +235,13 @@ def skull_stripping():
     global segmentation
     global image_registered
     global image
+    global image_stripped_path
 
-    image = algorithmsCollection.skull_stripped(segmentation)
+    image = algorithmsCollection.skull_stripped(image_path)
+    final_img = nib.Nifti1Image(image.astype(int),np.eye(4))
+    final_img.header.set_data_dtype(np.float32)
+    nib.save(final_img,'./data/FLAIR_stripped.nii.gz')
+    image_stripped_path = './data/FLAIR_stripped.nii.gz'
     segmentation = copy.deepcopy(image)
     draw_image(segmentation)
 
