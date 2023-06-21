@@ -34,7 +34,7 @@ liquid_volume = 0
 BG_COLOR = "white"
 HIST_SIZE = (3, 3)
 SEG_SIZE = (4, 4)
-
+#ASDASDASD
 
 def select_image_to_registration():
     global image_to_pair_registration
