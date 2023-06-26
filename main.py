@@ -177,11 +177,11 @@ def denoise():
     global image
     global segmentation
     if denoise_selected == "Mean filter":
-        image = algorithmsCollection.mean_filter(image)
+        image = algorithmsCollection.mean_filter(segmentation)
     if denoise_selected == "Median filter":
-        image = algorithmsCollection.median_filter(image)
+        image = algorithmsCollection.median_filter(segmentation)
     if denoise_selected == "Median Filter Borders":
-        image = algorithmsCollection.meddian_filter_border(image)
+        image = algorithmsCollection.meddian_filter_border(segmentation)
     segmentation = copy.deepcopy(image)
     draw_image(segmentation)
 
@@ -216,7 +216,7 @@ def metrics():
     
     image = nib.load(image_path)
     final_img = nib.Nifti1Image(segmentation,image.affine,image.header)
-    
+    nib.save(final_img,'./data/segmentation.nii.gz')
     values = algorithmsCollection.metrics(final_img)
     print(values)
     # Simular la obtención de los nuevos valores dinámicamente
@@ -259,13 +259,13 @@ def standarization():
     global segmentation
     global image_to_histogram_matching
     if standarization_selected == "Z-score":
-        image = algorithmsCollection.z_score(image)
+        image = algorithmsCollection.z_score(segmentation)
     if standarization_selected == "White Stripe":
-        image = algorithmsCollection.white_stripe(image)
+        image = algorithmsCollection.white_stripe(segmentation)
     if standarization_selected == "Rescaling":
-        image = algorithmsCollection.rescaling(image)
+        image = algorithmsCollection.rescaling(segmentation)
     if standarization_selected == "Histogram Matching":
-        image = algorithmsCollection.histogram_matching(image, image_to_histogram_matching, 50)
+        image = algorithmsCollection.histogram_matching(segmentation, image_to_histogram_matching, 50)
 
     segmentation = copy.deepcopy(image)
     draw_image(segmentation)
@@ -286,7 +286,7 @@ def draw_image(segmentation):
     fig, ax = plt.subplots(figsize=SEG_SIZE)
     canvas = FigureCanvasTkAgg(fig, master=frame_center)
 
-    image = ax.imshow(segmentation_section)
+    image = ax.imshow(segmentation_section,cmap="gray")
     plt.colorbar(image, ax=ax, location='right')
     canvas.draw()
     canvas.get_tk_widget().pack(expand=True)
@@ -349,7 +349,7 @@ def drawHistogram():
 
 
 root = tk.Tk()
-root.title("Interfaz de Subida de Datos")
+root.title("Procesamiento digital de imágenes")
 root.geometry("1200x800")
 root.resizable(False, False)  # Bloquear redimensionamiento
 
@@ -402,13 +402,13 @@ button_metrics = tk.Button(master=frame_metrics, text="Aplicar",
                                 command=lambda: metrics())
 button_metrics.grid(padx=5, row=0, sticky="W")
 tk.Label(master=frame_metrics,
-         text="Volúmen Materia Gris: ", bg=BG_COLOR).grid(pady=5, row=1,sticky="W")
+         text="Label 1: ", bg=BG_COLOR).grid(pady=5, row=1,sticky="W")
 tk.Label(master=frame_metrics,
-         text="Volúmen Materia Blanca: ", bg=BG_COLOR).grid(pady=5, row=2,sticky="W")
+         text="Label 2: ", bg=BG_COLOR).grid(pady=5, row=2,sticky="W")
 tk.Label(master=frame_metrics,
-         text="Volúmen Líquido Cerebro Espinal: ", bg=BG_COLOR).grid(pady=5, row=3,sticky="W")
+         text="Label 3: ", bg=BG_COLOR).grid(pady=5, row=3,sticky="W")
 tk.Label(master=frame_metrics,
-         text="Volúmen Lesiones: ", bg=BG_COLOR).grid(pady=5, row=4,sticky="W")
+         text="Label 4: ", bg=BG_COLOR).grid(pady=5, row=4,sticky="W")
 # Crear los labels dinámicos utilizando las variables de control
 tk.Label(master=frame_metrics, textvariable=materia_gris_var, bg="white").grid(pady=5, row=1, column=1, sticky="W")
 tk.Label(master=frame_metrics, textvariable=materia_blanca_var, bg="white").grid(pady=5, row=2, column=1, sticky="W")
