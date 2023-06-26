@@ -17,6 +17,7 @@ image_to_pair_registration = None
 image_to_pair_registration_path = ""
 image_to_histogram_matching = None
 image_registered = ""
+image_registered_path = ""
 max_depth = 0
 slider = None
 algorithm_selected = ""
@@ -236,8 +237,8 @@ def skull_stripping():
     global image_registered
     global image
     global image_stripped_path
-
-    image = algorithmsCollection.skull_stripped(image_path)
+    global image_registered_path
+    image = algorithmsCollection.skull_stripped(image_registered_path)
     final_img = nib.Nifti1Image(image.astype(int),np.eye(4))
     final_img.header.set_data_dtype(np.float32)
     nib.save(final_img,'./data/FLAIR_stripped.nii.gz')
@@ -251,7 +252,14 @@ def registration():
     global type_of_transform
     global segmentation
     global image_registered
+    global image_registered_path
     segmentation = algorithmsCollection.registration(image_path,image_to_pair_registration_path,type_of_transform)
+    image = nib.load(image_path)
+    segmentation_to_save = nib.Nifti1Image(segmentation.numpy(),image.affine,image.header)
+    #segmentation_to_save = nib.Nifti1Image(segmentation.numpy().astype(np.float64),np.eye(4))
+    segmentation_to_save.header.set_data_dtype(np.float32)
+    image_registered_path = './data/FLAIR_registered.nii.gz'
+    nib.save(segmentation_to_save, image_registered_path)
     draw_image(segmentation)
     
 def standarization():
