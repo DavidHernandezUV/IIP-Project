@@ -238,7 +238,8 @@ def skull_stripping():
     global image
     global image_stripped_path
     global image_registered_path
-    image = algorithmsCollection.skull_stripped(image_registered_path)
+    global image_path
+    image = algorithmsCollection.skull_stripped(image_registered_path if image_registered_path != '' else image_path)
     final_img = nib.Nifti1Image(image.astype(int),np.eye(4))
     final_img.header.set_data_dtype(np.float32)
     nib.save(final_img,'./data/FLAIR_stripped.nii.gz')
